@@ -11,8 +11,10 @@ sys.path.append("/lustre/naasc/sciops/comm/rindebet/AIV/science/analysis_scripts
 import analysisUtils as aU
 
 
-# do we want to reload all information?  if False, then it'll read from the pickle to save time.
-reload=True
+# do we want to reload all information i.e. re-parse all weblog?
+# if False, then it'll read from the pickle to save time.
+# but if you're adding features you want it to be True
+reload=False
 
 
 # get weblogs from disk area - only image and calimage have been untarred, 
@@ -33,6 +35,10 @@ runs=np.array(sorted(glob(rt+"uid_*weblog")))
 z=np.where(np.array(['tmp' not in r for r in runs]))[0]
 runs=runs[z]
 
+# test
+# runs=runs[0:45]
+
+
 # don't re-parse directories already in the pickle.
 if not reload:
    for mous in results.keys():
@@ -41,9 +47,6 @@ if not reload:
       for i,iz in enumerate(z):
          runs=np.delete(runs,iz-i)
 
-
-# test
-# runs=runs[0:20]
 
 
 
@@ -132,27 +135,30 @@ for run in runs:
       # imaging stages:
       # what number each stage is depends on the version and recipe
       # TODO add renorm recipes here
-      # TODO can probably automate this based on the parsing of the by task
-      # page below
 
       procedure=root.find('ProcessingRequests/ProcessingRequest/ProcessingProcedure/ProcedureTitle').text
+
       if procedure.split("_")[1]=='image':
-         precheck="4"
-         contim="12"
-         cubeim="14"
+         precheckstage="4"
+         checksizestage="5"
+         contimstage="12"
+         cubeimstage="14"
       else:
          if plversion=="2020" or plversion=="2021":
-            precheck="24"
-            contim="36"
-            cubeim="38"
+            precheckstage="24"
+            checksizestage="25"
+            contimstage="36"
+            cubeimstage="38"
          else:
-            precheck="22"
-            contim="33"
-            cubeim="35"
+            precheckstage="22"
+            checksizestage="23"
+            contimstage="33"
+            cubeimstage="35"
 
-      imprecheck=glob(run+"/html/stage"+precheck+"/t2-4m_details.html")
-      contimpages=glob(run+"/html/stage"+contim+"/t2-4m_details.html")
-      cubeimpages=glob(run+"/html/stage"+cubeim+"/t2-4m_details.html")
+      imprecheck=glob(run+"/html/stage"+precheckstage+"/t2-4m_details.html")
+      checksizepages=glob(run+"/html/stage"+checksizestage+"/t2-4m_details.html")
+      contimpages=glob(run+"/html/stage"+contimstage+"/t2-4m_details.html")
+      cubeimpages=glob(run+"/html/stage"+cubeimstage+"/t2-4m_details.html")
 
 
 
@@ -167,14 +173,6 @@ for run in runs:
          continue
       
 
-      x=soup.table.tbody.find_all('tr')
-      offset=0
-      # deal with warnings
-      if x[0].has_attr('class'): 
-         if 'warning' in x[0]['class'] or 'danger' in x[0]['class']:
-            x=soup.find_all('table')[1].tbody.find_all('tr')
-      
-                            
 
       # ===========================================
       # get task runtimes from "by task" page
@@ -187,10 +185,10 @@ for run in runs:
             timestr=s.findNext("td").findNext("td").findNext("td").text
             allimagetime += str2hrs(timestr)
 
-            if cubeim in s.text:
+            if cubeimstage in s.text:
                cubeimagetime = str2hrs(timestr)
 
-            if contim in s.text:
+            if contimstage in s.text:
                contimagetime = str2hrs(timestr)
 
          if "hif_findcont" in s.text:
@@ -315,8 +313,34 @@ for run in runs:
 
 
 
+      # -----------------------------------------------------------
+      # checkproductsize info
 
+      soup = BeautifulSoup(open(checksizepages[0]).read(), 'html.parser')
 
+      mitigationstring=soup.p.text # first <p> should be the header - TODO if there are warnings, make sure there isn't a mess here.
+      x=mitigationstring.split("\n")
+      allowedcubesize   = float(x[1].split()[-2])
+      allowedcubelimit  = float(x[3].split()[-2])
+      predcubesize      = float(x[5].split()[-2])
+      mitigatedcubesize = float(x[7].split()[-2])
+      allowedprodsize   = float(x[9].split()[-2])
+      initialprodsize   = float(x[11].split()[-2])
+      mitigatedprodsize = float(x[15].split()[-2])
+
+      x=soup.table.tbody.find_all('tr')
+      # deal with warnings
+      if x[0].has_attr('class'): 
+         if 'warning' in x[0]['class'] or 'danger' in x[0]['class']:
+            x=soup.find_all('table')[1].tbody.find_all('tr')
+ 
+      # for AK this is x, a list of the mitigation parameters
+      # [<td>default</td>,
+      #  <td>default</td>,
+      #  <td>default</td>,
+      #  <td>default</td>,
+      #  <td>default</td>]
+      print(x)
 
       results[mous]={'project':pid,
                      'plversion':plversion,
@@ -336,7 +360,15 @@ for run in runs:
                      'webcontBW':webcontBW,  
                      'webfreq':webfreq,  
                      'webdirtyDR':webdirtyDR,
-                     'webcontpk':webcontpk      # achieved agg cont pk
+                     'webcontpk':webcontpk,      # achieved agg cont pk
+                     'allowedcubesize'  :allowedcubesize  , 
+                     'allowedcubelimit' :allowedcubelimit , 
+                     'predcubesize'     :predcubesize     , 
+                     'mitigatedcubesize':mitigatedcubesize, 
+                     'allowedprodsize'  :allowedprodsize  , 
+                     'initialprodsize'  :initialprodsize  , 
+                     'mitigatedprodsize':mitigatedprodsize 
+
       }
 
 
