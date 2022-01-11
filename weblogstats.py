@@ -3,7 +3,7 @@ from glob import glob
 from bs4 import BeautifulSoup 
 import pdb
 from datetime import date
-import pickle
+import pickle, re
 import numpy as np
 import sys
 # sys.path.append("/home/casa/contrib/AIV/science/analysis_scripts/")
@@ -144,7 +144,12 @@ for run in runs:
          contimstage="12"
          cubeimstage="14"
       else:
-         if plversion=="2020" or plversion=="2021":
+         if plversion=="2020":
+            precheckstage="24"
+            checksizestage="25"
+            contimstage="35"
+            cubeimstage="37"
+         elif plversion=="2021":
             precheckstage="24"
             checksizestage="25"
             contimstage="36"
@@ -162,14 +167,13 @@ for run in runs:
 
 
 
-      # check the cube imaging to make sure this is not polz
-      # we can't deal with polz.
+      # check the cube imaging to make sure we got that stage right
 
       soup = BeautifulSoup(open(cubeimpages[0]).read(), 'html.parser')
       
-      # for polcal, this stage is not the one we want.  so pooh.
+      # this stage is not the one we want.  so pooh.
       if not 'Tclean' in soup.div.h1.text.split()[1]:
-         print("looks like polz")
+         print("something wrong with stages")
          continue
       
 
@@ -201,12 +205,26 @@ for run in runs:
             stageno=s.text.split(".")[0]
             clog=run+"/html/stage"+stageno+"/casapy.log"
             fc_im_sec=0
-            for sspw in aU.findImageSpwsFromCasalog(clog):
+            # aU.findImageSpwsFromCasalog(clog) doesn't do virtual spws
+            # for that its better to use the image names:
+            vspws=[]
+            with open(clog,'r') as f:
+               for line in f:
+                  if re.search("Executing tclean",line):
+                     fname=line.split("imagename='")[1].split("'")[0]
+                     vspw=fname.split("spw")[1].split(".")[0]
+                     vspws.append(int(vspw))
+            for sspw in vspws: 
                fc_im_sec += aU.timeTclean(clog,spw=str(sspw),style="findcont",quiet=True)
             fctime = fc_im_sec/3600
             allimagetime += fctime
 
+            
+      # -----------------------------------------------
+      # rep tgt from imageprecheck
 
+      soup = BeautifulSoup(open(imprecheck[0]).read(), 'html.parser')
+      predtgt = soup.h4.next_sibling.replace("\n","").split()[-1]
 
 
 
@@ -340,7 +358,6 @@ for run in runs:
       #  <td>default</td>,
       #  <td>default</td>,
       #  <td>default</td>]
-      print(x)
 
       results[mous]={'project':pid,
                      'plversion':plversion,
