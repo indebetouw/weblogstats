@@ -17,7 +17,7 @@ import analysisUtils as aU
 #reload=False
 reload=True
 
-# get weblogs from disk area -
+# get weblogs from disk area - 
 rt='/lustre/naasc/sciops/comm/rindebet/pipeline/c7weblogs/calimage/'
 
 pickleroot="weblogstats"
@@ -365,6 +365,7 @@ for run in runs:
 
       results[mous]={'project':pid,
                      'plversion':plversion,
+                     'procedure':procedure,
                      'nant':nant,
                      'totaltime':totaltime,
                      'imgtime':allimagetime,
