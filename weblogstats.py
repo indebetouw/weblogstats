@@ -17,9 +17,8 @@ import analysisUtils as aU
 reload=False
 
 
-# get weblogs from disk area - only image and calimage have been untarred, 
-# otherwise we'd have to filter out the cal ones.
-rt='/lustre/naasc/sciops/comm/rindebet/pipeline/c7weblogs/weblogs/'
+# get weblogs from disk area - 
+rt='/lustre/naasc/sciops/comm/rindebet/pipeline/c7weblogs/calimage/'
 
 pickleroot="weblogstats"
 saved=sorted(glob(pickleroot+".*pkl"))
@@ -361,6 +360,7 @@ for run in runs:
 
       results[mous]={'project':pid,
                      'plversion':plversion,
+                     'procedure':procedure,
                      'nant':nant,
                      'totaltime':totaltime,
                      'imgtime':allimagetime,
