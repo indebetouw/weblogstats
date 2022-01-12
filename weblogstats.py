@@ -20,8 +20,6 @@ reload=True
 # get weblogs from disk area - only image and calimage have been untarred, 
 # otherwise we'd have to filter out the cal ones.
 rt='/lustre/naasc/sciops/comm/rindebet/pipeline/c7weblogs/calimage/'
-#rt = '/lustre/naasc/sciops/comm/akepley/pl/mitigation/extract_info_from_weblogs/test_data/'
-
 
 pickleroot="weblogstats"
 saved=sorted(glob(pickleroot+".*pkl"))
@@ -38,7 +36,7 @@ z=np.where(np.array(['tmp' not in r for r in runs]))[0]
 runs=runs[z]
 
 # test
-runs=runs[0:200]
+# runs=runs[0:45]
 
 # This project fails when finding the target source
 badidx = np.where(runs == '/lustre/naasc/sciops/comm/rindebet/pipeline/c7weblogs/calimage/uid___A001_X146c_Xdf.hifa_image.weblog')
