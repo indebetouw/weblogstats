@@ -17,8 +17,7 @@ import analysisUtils as aU
 #reload=False
 reload=True
 
-# get weblogs from disk area - only image and calimage have been untarred, 
-# otherwise we'd have to filter out the cal ones.
+# get weblogs from disk area -
 rt='/lustre/naasc/sciops/comm/rindebet/pipeline/c7weblogs/calimage/'
 
 pickleroot="weblogstats"
