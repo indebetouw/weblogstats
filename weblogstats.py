@@ -19,8 +19,9 @@ reload=True
 
 # get weblogs from disk area - only image and calimage have been untarred, 
 # otherwise we'd have to filter out the cal ones.
-#rt='/lustre/naasc/sciops/comm/rindebet/pipeline/c7weblogs/weblogs/'
-rt = '/lustre/naasc/sciops/comm/akepley/pl/mitigation/extract_info_from_weblogs/test_data/'
+rt='/lustre/naasc/sciops/comm/rindebet/pipeline/c7weblogs/calimage/'
+#rt = '/lustre/naasc/sciops/comm/akepley/pl/mitigation/extract_info_from_weblogs/test_data/'
+
 
 pickleroot="weblogstats"
 saved=sorted(glob(pickleroot+".*pkl"))
@@ -37,8 +38,11 @@ z=np.where(np.array(['tmp' not in r for r in runs]))[0]
 runs=runs[z]
 
 # test
-# runs=runs[0:45]
+runs=runs[0:200]
 
+# This project fails when finding the target source
+badidx = np.where(runs == '/lustre/naasc/sciops/comm/rindebet/pipeline/c7weblogs/calimage/uid___A001_X146c_Xdf.hifa_image.weblog')
+runs = np.delete(runs, badidx)
 
 # don't re-parse directories already in the pickle.
 if not reload:
@@ -292,9 +296,6 @@ for run in runs:
          webcontpk=webcontpk/1e6 # uJy to Jy
 
       webcontBW=float(x[offset+11].td.text.split()[0]) # assume GHz
-      
-      
-
 
 
       # -------------------------------------------------------------------
@@ -351,13 +352,19 @@ for run in runs:
       # deal with warnings
       if x[0].has_attr('class'): 
          if 'warning' in x[0]['class'] or 'danger' in x[0]['class']:
+            mitigated = True
             x=soup.find_all('table')[1].tbody.find_all('td')
-            
-            mit_nbins = x[0].text
-            mit_hm_imsize = x[1].text
-            mit_hm_cell = x[2].text
-            mit_field = x[3].text
-            mit_spw = x[4].text
+         ## might want an else clause here.
+      else:
+         mitigated = False
+         x=soup.find_all('table')[0].tbody.find_all('td')
+
+      # now save the mitigations
+      mit_nbins = x[0].text
+      mit_hm_imsize = x[1].text
+      mit_hm_cell = x[2].text
+      mit_field = x[3].text
+      mit_spw = x[4].text
 
       results[mous]={'project':pid,
                      'plversion':plversion,
@@ -385,12 +392,12 @@ for run in runs:
                      'allowedprodsize'  :allowedprodsize  , 
                      'initialprodsize'  :initialprodsize  , 
                      'mitigatedprodsize':mitigatedprodsize,
+                     'mitigated': mitigated,
                      'mit_nbins': mit_nbins,
                      'mit_hm_imsize': mit_hm_imsize,
                      'mit_hm_cell': mit_hm_cell,
                      'mit_field': mit_field,
                      'mit_spw': mit_spw
-
       }
 
 
