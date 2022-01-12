@@ -1,9 +1,10 @@
 import pdb
 from glob import glob
 from datetime import date
-import pickle
+import pickle,os
 import numpy as np
 import matplotlib.pyplot as pl
+from astropy.table import Table
 pl.ion()
 pl.clf()
 
@@ -12,6 +13,18 @@ saved=sorted(glob(pickleroot+".*pkl"))
 today=date.today().strftime("%Y%m%d")
 
 results=pickle.load(open(saved[-1],'rb'))
+
+csvfile="calruntimes.tbl"
+# for the image-only runs, get cal runtimes
+if os.path.exists(csvfile):
+   caltimes=Table.read(csvfile,format="ascii")
+   for i,m in enumerate(caltimes['mous']):
+       if m in results.keys():
+           if "calimage" not in results[m]['procedure']:
+               print("adding cal time to "+m)
+               results[m]['totaltime'] += caltimes['caltime'][i]
+               results[m]['procedure'] = "calimage"
+
 
 
 
@@ -83,7 +96,7 @@ mitigated=(prod0>prod1) | (cube0>cube1)
 
 # ----------------------------------------------------
 # time histogram
-nbin=10
+nbin=8
 lo=np.floor(np.log10(np.min(totaltime)))
 # override
 lo=0. # 1hr
@@ -173,25 +186,35 @@ pl.savefig("timeplot_imgfraction.png")
 
 # -------------------------------------
 # cumulative distributions, unmitigated at constant img/total
-if False:
+if True:
+    unit="days"
+
     pl.clf()
-    totplot,=pl.plot(totaltime,np.cumsum(totaltime),label='total')
+    if unit=="days":
+        fact=24
+    else:
+        fact=1.
+    totplot,=pl.plot(totaltime/fact,np.cumsum(totaltime/fact),label='total',linewidth=3)
     #pl.plot(totaltime,np.cumsum(totaltime-imgtime),label='not imaging')
-    imgplot,=pl.plot(totaltime,np.cumsum(imgtime),label='imaging')
+    imgplot,=pl.plot(totaltime/fact,np.cumsum(imgtime/fact),label='imaging',linewidth=3)
     
     unmittotal=totaltime.copy()
     z=np.where(ff>1)[0]
     unmittotal[z]=(imgtime*ff)[z]/.7  # just use flat 0.7 fraction for large projects
     
     u2=np.argsort(unmittotal)
-    pl.plot(unmittotal[u2],np.cumsum(unmittotal[u2]),label='unmitigated',color=totplot.get_color(),linestyle=":")
-    pl.plot(unmittotal[u2],np.cumsum((imgtime*ff)[u2]),label='unmitigated',color=imgplot.get_color(),linestyle="--")
+    pl.plot(unmittotal[u2]/fact,np.cumsum(unmittotal[u2]/fact),label='unmitigated total',linestyle=":",color=totplot.get_color())
+    pl.plot(unmittotal[u2]/fact,np.cumsum((imgtime*ff)[u2]/fact),label='unmitigated imaging',linestyle="--",color=imgplot.get_color())
     
-    pl.ylabel("hours in C7")
-    pl.xlabel("hours per MOUS")
+    if unit=="days":
+        pl.ylabel("processing days in C7")
+        pl.xlabel("processing days per MOUS")
+    else:
+        pl.ylabel("hours in C7")
+        pl.xlabel("hours per MOUS")
     pl.legend(loc="best",prop={"size":8})
     pl.savefig("timeplot_cumulative.linear.png")
     
-    pl.xscale("log")
-    pl.yscale("log")
-    pl.savefig("timeplot_cumulative.log.png")
+#    pl.xscale("log")
+#    pl.yscale("log")
+#    pl.savefig("timeplot_cumulative.log.png")
