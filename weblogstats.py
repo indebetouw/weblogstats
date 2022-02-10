@@ -14,8 +14,8 @@ import analysisUtils as aU
 # do we want to reload all information i.e. re-parse all weblog?
 # if False, then it'll read from the pickle to save time.
 # but if you're adding features you want it to be True
-reload=False
-
+#reload=False
+reload=True
 
 # get weblogs from disk area - 
 rt='/lustre/naasc/sciops/comm/rindebet/pipeline/c7weblogs/calimage/'
@@ -37,6 +37,9 @@ runs=runs[z]
 # test
 # runs=runs[0:45]
 
+# This project fails when finding the target source
+badidx = np.where(runs == '/lustre/naasc/sciops/comm/rindebet/pipeline/c7weblogs/calimage/uid___A001_X146c_Xdf.hifa_image.weblog')
+runs = np.delete(runs, badidx)
 
 # don't re-parse directories already in the pickle.
 if not reload:
@@ -290,9 +293,6 @@ for run in runs:
          webcontpk=webcontpk/1e6 # uJy to Jy
 
       webcontBW=float(x[offset+11].td.text.split()[0]) # assume GHz
-      
-      
-
 
 
       # -------------------------------------------------------------------
@@ -349,14 +349,19 @@ for run in runs:
       # deal with warnings
       if x[0].has_attr('class'): 
          if 'warning' in x[0]['class'] or 'danger' in x[0]['class']:
-            x=soup.find_all('table')[1].tbody.find_all('tr')
- 
-      # for AK this is x, a list of the mitigation parameters
-      # [<td>default</td>,
-      #  <td>default</td>,
-      #  <td>default</td>,
-      #  <td>default</td>,
-      #  <td>default</td>]
+            mitigated = True
+            x=soup.find_all('table')[1].tbody.find_all('td')
+         ## might want an else clause here.
+      else:
+         mitigated = False
+         x=soup.find_all('table')[0].tbody.find_all('td')
+
+      # now save the mitigations
+      mit_nbins = x[0].text
+      mit_hm_imsize = x[1].text
+      mit_hm_cell = x[2].text
+      mit_field = x[3].text
+      mit_spw = x[4].text
 
       results[mous]={'project':pid,
                      'plversion':plversion,
@@ -384,8 +389,13 @@ for run in runs:
                      'mitigatedcubesize':mitigatedcubesize, 
                      'allowedprodsize'  :allowedprodsize  , 
                      'initialprodsize'  :initialprodsize  , 
-                     'mitigatedprodsize':mitigatedprodsize 
-
+                     'mitigatedprodsize':mitigatedprodsize,
+                     'mitigated': mitigated,
+                     'mit_nbins': mit_nbins,
+                     'mit_hm_imsize': mit_hm_imsize,
+                     'mit_hm_cell': mit_hm_cell,
+                     'mit_field': mit_field,
+                     'mit_spw': mit_spw
       }
 
 
