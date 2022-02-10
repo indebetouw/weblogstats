@@ -20,12 +20,12 @@ processing time:
 'reptgt':predtgt,  
 
 Agg cont info:  
-'webpredrms':webpredrms,    # predicted agg cont rms. 
-'webcontrms':webcontrms,    # achieved agg cont rms. 
-'webcontBW':webcontBW,    
-'webfreq':webfreq,    
-'webdirtyDR':webdirtyDR,  
-'webcontpk':webcontpk,      # achieved agg cont pk. 
+'webpredrms':webpredrms,    # predicted agg cont rms   
+'webcontrms':webcontrms,    # achieved agg cont rms   
+'webcontBW':webcontBW,      
+'webfreq':webfreq,        
+'webdirtyDR':webdirtyDR,    
+'webcontpk':webcontpk,      # achieved agg cont pk.   
 
 mitigation info:  
 'allowedcubesize'  :allowedcubesize  ,   
