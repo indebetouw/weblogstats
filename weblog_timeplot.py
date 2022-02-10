@@ -21,7 +21,7 @@ if os.path.exists(csvfile):
    for i,m in enumerate(caltimes['mous']):
        if m in results.keys():
            if "calimage" not in results[m]['procedure']:
-               print("adding cal time to "+m)
+               print("adding cal time to "+m+(": %f -> %f"%(results[m]['totaltime'], results[m]['totaltime']+ caltimes['caltime'][i])))
                results[m]['totaltime'] += caltimes['caltime'][i]
                results[m]['procedure'] = "calimage"
 
@@ -145,10 +145,10 @@ pl.xscale("log")
 pl.ylabel("fraction of time imaging")
 # pl.xlim(1,1e3)
 pl.xlabel("PL runtime (hrs)")
-pl.ylim(0,1)
-pl.plot(totaltime,imgtime/totaltime,',',color='darkorange')
+#pl.ylim(0,1)
+#pl.plot(totaltime,imgtime/totaltime,',',color='darkorange')
 z=np.where(mitigated)
-pl.plot(totaltime[z],(imgtime/totaltime)[z],'.',color='r',label="mitigated")
+#pl.plot(totaltime[z],(imgtime/totaltime)[z],'.',color='r',label="mitigated")
 pl.legend(loc="best",prop={"size":8})
 
 z=np.where(mitigated * ((imgtime/totaltime)<0.3) )[0]
@@ -195,16 +195,11 @@ if True:
     else:
         fact=1.
     totplot,=pl.plot(totaltime/fact,np.cumsum(totaltime/fact),label='total',linewidth=3)
-    #pl.plot(totaltime,np.cumsum(totaltime-imgtime),label='not imaging')
     imgplot,=pl.plot(totaltime/fact,np.cumsum(imgtime/fact),label='imaging',linewidth=3)
     
     unmittotal=totaltime.copy()
     z=np.where(ff>1)[0]
     unmittotal[z]=(imgtime*ff)[z]/.7  # just use flat 0.7 fraction for large projects
-    
-    u2=np.argsort(unmittotal)
-    pl.plot(unmittotal[u2]/fact,np.cumsum(unmittotal[u2]/fact),label='unmitigated total',linestyle=":",color=totplot.get_color())
-    pl.plot(unmittotal[u2]/fact,np.cumsum((imgtime*ff)[u2]/fact),label='unmitigated imaging',linestyle="--",color=imgplot.get_color())
     
     if unit=="days":
         pl.ylabel("processing days in C7")
@@ -214,6 +209,13 @@ if True:
         pl.xlabel("hours per MOUS")
     pl.legend(loc="best",prop={"size":8})
     pl.savefig("timeplot_cumulative.linear.png")
+
+    u2=np.argsort(unmittotal)
+    pl.plot(unmittotal[u2]/fact,np.cumsum(unmittotal[u2]/fact),label='unmitigated total',linestyle=":",color=totplot.get_color())
+    pl.plot(unmittotal[u2]/fact,np.cumsum((imgtime*ff)[u2]/fact),label='unmitigated imaging',linestyle="--",color=imgplot.get_color())
+    pl.savefig("timeplot_cumulative.linear.unmitigated.png")
+    
+
     
 #    pl.xscale("log")
 #    pl.yscale("log")
