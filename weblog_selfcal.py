@@ -4,7 +4,11 @@ import numpy as np
 from glob import glob
 from datetime import date
 
-pickleroot="weblogstats"
+plotroot="bm2021"
+#plotroot="allc7"
+
+pickleroot=plotroot+"_stats"
+
 saved=sorted(glob(pickleroot+".*pkl"))
 today=date.today().strftime("%Y%m%d")
 
@@ -87,19 +91,19 @@ for k,x in enumerate(xs):
    
       if symbol=="array":
          z=np.where(nant<15)
-         pl.scatter(x[0][z],rmsrat[z],c=c[z],vmin=c.min(),vmax=c.max(),cmap='jet',marker='x')
+         pl.scatter(x[0][z],rmsrat[z],c=c[z],vmin=c.min(),vmax=c.max(),cmap='jet',marker='x',s=3)
          z=np.where(nant>15)
-         pl.scatter(x[0][z],rmsrat[z],c=c[z],vmin=c.min(),vmax=c.max(),cmap='jet',marker='o')
-         pl.plot(x[0].min(),rmsrat.min(),'kx',label='7m')
-         pl.plot(x[0].min(),rmsrat.min(),'ko',label='12m')
+         pl.scatter(x[0][z],rmsrat[z],c=c[z],vmin=c.min(),vmax=c.max(),cmap='jet',marker='o',s=3)
+         pl.plot(x[0].max()*2,rmsrat.min(),'kx',markersize=3,label='7m')
+         pl.plot(x[0].max()*2,rmsrat.min(),'ko',markersize=3,label='12m')
    
       elif symbol=="nEB":
          z=np.where(neb==1)
-         pl.scatter(x[0][z],rmsrat[z],c=c[z],vmin=c.min(),vmax=c.max(),cmap='jet',marker='x')
+         pl.scatter(x[0][z],rmsrat[z],c=c[z],vmin=c.min(),vmax=c.max(),cmap='jet',marker='x',s=3)
          z=np.where(neb>1)
-         pl.scatter(x[0][z],rmsrat[z],c=c[z],vmin=c.min(),vmax=c.max(),cmap='jet',marker='o')
-         pl.plot(x[0].min(),rmsrat.min(),'kx',label='1EB')
-         pl.plot(x[0].min(),rmsrat.min(),'ko',label='>1EB')
+         pl.scatter(x[0][z],rmsrat[z],c=c[z],vmin=c.min(),vmax=c.max(),cmap='jet',marker='o',s=3)
+         pl.plot(x[0].max()*2,rmsrat.min(),'kx',markersize=3,label='1EB')
+         pl.plot(x[0].max()*2,rmsrat.min(),'ko',markersize=3,label='>1EB')
    
       if colorby:
          cb=pl.colorbar(label=colorby)
@@ -109,8 +113,11 @@ for k,x in enumerate(xs):
       for i in range(len(results)):
          myplot,=pl.plot([x[0][i],x[1][i]],[rmsrat[i],rmsrat[i]],color=pl.cm.jet((c[i]-c.min())/(c.max()-c.min())))
    
-         if rmsrat[i] >200 or dirtyDRperant[i]>3000:
-            pl.text(x[0][i],rmsrat[i],target[i],color=myplot.get_color())
+         # for BM, we don't have as many bright so dirtyDR>1000; 
+         # for all C7 use 5000 here:
+         if rmsrat[i] >200 or dirtyDRperant[i]>1000:
+            if rmsrat[i]>500:
+               pl.text(x[0][i],rmsrat[i],target[i],color=myplot.get_color())
             # pl.text(x[0][i],rmsrat[i],freq[i],color=myplot.get_color())
             # print("%6i %-5.2f %14s %24s %12s %1i %2i %3i"%(x[0][i],rmsrat[i],target[i],mous[i],project[i],neb[i],nscan[i],npt[i]))
             print("{:>6.0f} {:>6.2f} {:>14s} {:>24s} {:>12s} {:1} {:>2} {:>3}".format(x[0][i],rmsrat[i],target[i],mous[i],project[i],neb[i],nscan[i],npt[i]))
@@ -118,78 +125,83 @@ for k,x in enumerate(xs):
    
       pl.ylabel('cont rms / theoretical cont rms')
       pl.xlabel(xtit[k])
+      pl.xlim(.1,1e5)
+      pl.ylim(.5,1e5)
       pl.xscale("log")
       pl.yscale("log")
       pl.legend(loc="best",prop={"size":8})
    
       if colorby:
-         pl.savefig("cont_bm2021_rmsratio_"+filetit[k]+"_"+symbol+"_"+colorby+".png")
+         pl.savefig(plotroot+"_cont_rmsratio_"+filetit[k]+"_"+symbol+"_"+colorby+".png")
       else:
-         pl.savefig("cont_bm2021_rmsratio_"+filetit[k]+"_"+symbol+".png")
+         pl.savefig(plotroot+"_cont_rmsratio_"+filetit[k]+"_"+symbol+".png")
 
 
 
 #---------------------------------------------------------------------------------------
 
 
+if True:
 
-pl.clf()
-pl.subplot(212)
-# >1EB and per-EB SNR>10 might be able to have some EB-EB at least checks 
-
-order=np.argsort(cleanDRperEB)[::-1]
-y=cleanDRperEB[order]
-neby=neb[order]
-ntot=len(y)
-x=np.arange(ntot)/ntot
-pl.plot(y,x,'k:',alpha=0.2)
-
-z=np.where(neby>1)[0]
-n=len(z)
-x=np.arange(n)/ntot
-
-z2=np.where(y[z]<10)[0].min()
-pl.plot([10,10],[0,x[z2]],"k:")
-pl.plot(y[z],x,label='>1EB; SNR>10: %2ipct'%(x[z2]*100))
-
-pl.ylim(0,0.6)
-pl.xlabel("SNR/EB")
-pl.ylabel("fraction of MOUS")
-pl.xscale("log")
-pl.legend(loc="best",prop={"size":10})
-
-
-# perEB/per-ant SNR>1 may be amenable to single-gain self-cal
-# single fields with perEB/per-ant SNR>3 may be amenable to sub-scan self-cal
-
-pl.subplot(211)
-order=np.argsort(dirtyDRperscan)[::-1]
-y=dirtyDRperscan[order]
-npty=npt[order]
-projy=project[order]
-
-
-z=np.where(npty==1)[0]
-n=len(z)
-x=np.arange(n)/ntot
-z2=np.where(y[z]<3)[0].min()
-myplot,=pl.plot(y[z],x,label='1fld, SNR>3: %2ipct'%(x[z2]*100))
-pl.plot([3,3],[0,x[z2]],":",color=myplot.get_color())
-
-x=np.arange(ntot)/ntot
-z2=np.where(y<1)[0].min()
-myplot,=pl.plot(y,x,label='SNR>1: %2ipct'%(x[z2]*100))
-pl.plot([1,1],[0,x[z2]],":",color=myplot.get_color())
-
-pl.xlabel("SNR/EB/ant/scan")
-pl.ylabel("fraction of MOUS")
-pl.xscale("log")
-
-#pl.gca().grid(True,linestyle='-.')
-pl.legend(loc="best",prop={"size":10})
-
-pl.subplots_adjust(hspace=0.4)
-pl.savefig("contSNR_perscan_distrib.png")
+    pl.clf()
+    pl.subplot(212)
+    # >1EB and per-EB SNR>10 might be able to have some EB-EB at least checks 
+    
+    order=np.argsort(cleanDRperEB)[::-1]
+    y=cleanDRperEB[order]
+    neby=neb[order]
+    ntot=len(y)
+    x=np.arange(ntot)/ntot
+    pl.plot(y,x,'k:',alpha=0.2)
+    
+    z=np.where(neby>1)[0]
+    n=len(z)
+    x=np.arange(n)/ntot
+    
+    z2=np.where(y[z]<10)[0].min()
+    pl.plot([10,10],[0,x[z2]],"k:")
+    pl.plot(y[z],x,label='>1EB; SNR>10: %2ipct'%(x[z2]*100))
+    
+    pl.ylim(0,0.6)
+    pl.xlim(1,1e5)
+    pl.xlabel("SNR/EB")
+    pl.ylabel("fraction of MOUS")
+    pl.xscale("log")
+    pl.legend(loc="best",prop={"size":10})
+    
+    
+    # perEB/per-ant SNR>1 may be amenable to single-gain self-cal
+    # single fields with perEB/per-ant SNR>3 may be amenable to sub-scan self-cal
+    
+    pl.subplot(211)
+    order=np.argsort(dirtyDRperscan)[::-1]
+    y=dirtyDRperscan[order]
+    npty=npt[order]
+    projy=project[order]
+    
+    
+    z=np.where(npty==1)[0]
+    n=len(z)
+    x=np.arange(n)/ntot
+    z2=np.where(y[z]<3)[0].min()
+    myplot,=pl.plot(y[z],x,label='1fld, SNR>3: %2ipct'%(x[z2]*100))
+    pl.plot([3,3],[0,x[z2]],":",color=myplot.get_color())
+    
+    x=np.arange(ntot)/ntot
+    z2=np.where(y<1)[0].min()
+    myplot,=pl.plot(y,x,label='SNR>1: %2ipct'%(x[z2]*100))
+    pl.plot([1,1],[0,x[z2]],":",color=myplot.get_color())
+    
+    pl.xlim(.1,1e4)
+    pl.xlabel("SNR/EB/ant/scan")
+    pl.ylabel("fraction of MOUS")
+    pl.xscale("log")
+    
+    #pl.gca().grid(True,linestyle='-.')
+    pl.legend(loc="best",prop={"size":10})
+    
+    pl.subplots_adjust(hspace=0.4)
+    pl.savefig(plotroot+"_contSNR_perscan_distrib.png")
 
 
 

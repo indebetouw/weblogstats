@@ -14,13 +14,22 @@ import analysisUtils as aU
 # do we want to reload all information i.e. re-parse all weblog?
 # if False, then it'll read from the pickle to save time.
 # but if you're adding features you want it to be True
-#reload=False
-reload=True
+reload=False
+#reload=True
 
 # get weblogs from disk area - 
 rt='/lustre/naasc/sciops/comm/rindebet/pipeline/c7weblogs/calimage/'
+plotroot="allc7"
 
-pickleroot="weblogstats"
+# PLBM
+rt='/lustre/cv/projects/pipeline_validation/pipeline_validation_2021/mostrecentUnique_weblogs/'
+plotroot="bm2021"
+
+pickleroot=plotroot+"_stats"
+
+
+
+
 saved=sorted(glob(pickleroot+".*pkl"))
 today=date.today().strftime("%Y%m%d")
 
@@ -30,7 +39,7 @@ else:
    reload=True
    results={}
 
-runs=np.array(sorted(glob(rt+"uid_*weblog")))
+runs=np.array(sorted(glob(rt+"*weblog")))
 z=np.where(np.array(['tmp' not in r for r in runs]))[0]
 runs=runs[z]
 
@@ -152,10 +161,16 @@ for run in runs:
             contimstage="35"
             cubeimstage="37"
          elif plversion=="2021":
-            precheckstage="24"
-            checksizestage="25"
-            contimstage="36"
-            cubeimstage="38"
+            if "pol" in procedure:
+               precheckstage="29"
+               checksizestage="30"
+               contimstage="41"
+               cubeimstage="43"
+            else:
+               precheckstage="24"
+               checksizestage="25"
+               contimstage="36"
+               cubeimstage="38"
          else:
             precheckstage="22"
             checksizestage="23"
@@ -176,7 +191,8 @@ for run in runs:
       # this stage is not the one we want.  so pooh.
       if not 'Tclean' in soup.div.h1.text.split()[1]:
          print("something wrong with stages")
-         continue
+         pdb.set_trace()
+         # continue
       
 
 
@@ -226,7 +242,13 @@ for run in runs:
       # rep tgt from imageprecheck
 
       soup = BeautifulSoup(open(imprecheck[0]).read(), 'html.parser')
-      predtgt = soup.h4.next_sibling.replace("\n","").split()[-1]
+      predtgtfld = soup.h4.next_sibling.replace("\n","")
+      predtgt = predtgtfld.split()[-1]
+
+      # 2015 don't have rep tgt
+      if predtgt=="target)":
+         predtgt = predtgtfld.split()[-3].split("(")[0]
+
 
 
 

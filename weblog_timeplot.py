@@ -8,7 +8,10 @@ from astropy.table import Table
 pl.ion()
 pl.clf()
 
-pickleroot="weblogstats"
+plotroot="allc7"
+plotroot="bm2021"
+pickleroot=plotroot+"_stats"
+
 saved=sorted(glob(pickleroot+".*pkl"))
 today=date.today().strftime("%Y%m%d")
 
@@ -154,20 +157,34 @@ pl.legend(loc="best",prop={"size":8})
 z=np.where(mitigated * ((imgtime/totaltime)<0.3) )[0]
 print(mous[z])
 
-# pl.subplot(211)
+pl.savefig(plotroot+"_timeplot_imgfraction.png")
+
+
+pl.clf()
+# histogram of hours "ct"
 # binhrs=np.concatenate([[0],ct*xbins])
 # pl.step(bins,binhrs,label="total")
 # imgplot,=pl.step(bins,np.concatenate([[0],imgbin]),label="sci img")
 # cubeplot,=pl.step(bins,np.concatenate([[0],cubebin]),label="cube img")
 # pl.xscale("log")
 # pl.ylabel("hrs/bin = # mous * runtime")
-# #pl.xlabel("PL runtime (hrs)")
+# pl.ylabel("# mous")
+# pl.xlabel("PL runtime (hrs)")
 # pl.legend(loc="best",prop={"size":8})
 # xlfull=pl.xlim()
 # pl.xlim(1,1e3)
 
-pl.savefig("timeplot_imgfraction.png")
+# histogram of number of mous
+ict,b=np.histogram(imgtime,bins=bins)
+pl.step(bins,np.concatenate([[0],ct]),label="total")
+imgplot,=pl.step(bins,np.concatenate([[0],ict]),label="sci img")
+# cubeplot,=pl.step(bins,np.concatenate([[0],cubebin]),label="cube img")
+pl.xscale("log")
+pl.ylabel("# mous")
+pl.xlabel("PL runtime (hrs)")
+pl.legend(loc="best",prop={"size":8})
 
+pl.savefig(plotroot+"_timeplot_distrib.png")
 
 
 # pl.subplot(211)
@@ -178,7 +195,7 @@ pl.savefig("timeplot_imgfraction.png")
 # pl.subplot(212)
 # pl.xlim(xlfull)
 # 
-# pl.savefig("timeplot_distrib_unmitigated.png")
+# pl.savefig(plotroot+_"timeplot_distrib_unmitigated.png")
 
 
 
@@ -208,15 +225,15 @@ if True:
         pl.ylabel("hours in C7")
         pl.xlabel("hours per MOUS")
     pl.legend(loc="best",prop={"size":8})
-    pl.savefig("timeplot_cumulative.linear.png")
+    pl.savefig(plotroot+"_timeplot_cumulative.linear.png")
 
     u2=np.argsort(unmittotal)
     pl.plot(unmittotal[u2]/fact,np.cumsum(unmittotal[u2]/fact),label='unmitigated total',linestyle=":",color=totplot.get_color())
     pl.plot(unmittotal[u2]/fact,np.cumsum((imgtime*ff)[u2]/fact),label='unmitigated imaging',linestyle="--",color=imgplot.get_color())
-    pl.savefig("timeplot_cumulative.linear.unmitigated.png")
+    pl.savefig(plotroot+"_timeplot_cumulative.linear.unmitigated.png")
     
 
     
 #    pl.xscale("log")
 #    pl.yscale("log")
-#    pl.savefig("timeplot_cumulative.log.png")
+#    pl.savefig(plotroot+"_timeplot_cumulative.log.png")
