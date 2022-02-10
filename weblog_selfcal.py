@@ -1,6 +1,8 @@
 import pdb
 import pickle
 import numpy as np
+from glob import glob
+from datetime import date
 
 pickleroot="weblogstats"
 saved=sorted(glob(pickleroot+".*pkl"))
@@ -46,6 +48,7 @@ cleanDRperscan=cleanDRperant/np.sqrt(nscan)
 
 cleanDRperEB =cleanDR/np.sqrt(neb)
 
+mous=list(results.keys())
 
 
 
@@ -62,15 +65,16 @@ xs     =(dirtyDR,cleanDR),(dirtyDRperscan,cleanDRperscan),
 xtit   ="SNR","SNR per EB per ant per scan" # for the plot
 filetit="SNR","SNRperscan" # for the plotfile
 
-xs     =(dirtyDR,cleanDR),
-xtit   ="SNR",
-filetit="SNR",
+# xs     =(dirtyDR,cleanDR),
+# xtit   ="SNR",
+# filetit="SNR",
 
 colorby="freq"
 symbols=["nEB"]
 
 
 for k,x in enumerate(xs):
+   print("-----")
    for symbol in symbols:
       pl.clf()
    
@@ -108,6 +112,8 @@ for k,x in enumerate(xs):
          if rmsrat[i] >200 or dirtyDRperant[i]>3000:
             pl.text(x[0][i],rmsrat[i],target[i],color=myplot.get_color())
             # pl.text(x[0][i],rmsrat[i],freq[i],color=myplot.get_color())
+            # print("%6i %-5.2f %14s %24s %12s %1i %2i %3i"%(x[0][i],rmsrat[i],target[i],mous[i],project[i],neb[i],nscan[i],npt[i]))
+            print("{:>6.0f} {:>6.2f} {:>14s} {:>24s} {:>12s} {:1} {:>2} {:>3}".format(x[0][i],rmsrat[i],target[i],mous[i],project[i],neb[i],nscan[i],npt[i]))
    
    
       pl.ylabel('cont rms / theoretical cont rms')
