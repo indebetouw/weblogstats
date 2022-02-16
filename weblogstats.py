@@ -15,15 +15,15 @@ import analysisUtils as aU
 # if False, then it'll read from the pickle to save time.
 # but if you're adding features you want it to be True
 reload=False
-#reload=True
+reload=True
 
 # get weblogs from disk area - 
 rt='/lustre/naasc/sciops/comm/rindebet/pipeline/c7weblogs/calimage/'
 plotroot="allc7"
 
 # PLBM
-rt='/lustre/cv/projects/pipeline_validation/pipeline_validation_2021/mostrecentUnique_weblogs/'
-plotroot="bm2021"
+# rt='/lustre/cv/projects/pipeline_validation/pipeline_validation_2021/mostrecentUnique_weblogs/'
+# plotroot="bm2021"
 
 pickleroot=plotroot+"_stats"
 
@@ -331,8 +331,11 @@ for run in runs:
       soup = BeautifulSoup(open(ms0+"/t2-2-1.html").read(), 'html.parser')
       sources = soup.table.findAll('tr')[2:]
       npt=-1
+      nscience=0
       for source in sources:
          sname=source.findAll('td')[1].text.strip("'")
+         if 'TARGET' in source.findAll('td')[8].text:
+            nscience=nscience+1
          if predtgt in sname:
             npt=int(source.findAll('td')[7].text)
       if npt<=0:
@@ -399,6 +402,8 @@ for run in runs:
                      'npt':npt, # for reptgt 
                      'nscan':nscan, # for reptgt 
                      'reptgt':predtgt,
+                     'nscience':nscience,        # number of science targets
+                     'nspw':len(np.unique(vspws)), # spws, from findcont page
                      'webpredrms':webpredrms,    # predicted agg cont rms
                      'webcontrms':webcontrms,    # achieved agg cont rms
                      'webcontBW':webcontBW,  
