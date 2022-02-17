@@ -50,6 +50,8 @@ runs=runs[z]
 badidx = np.where(runs == '/lustre/naasc/sciops/comm/rindebet/pipeline/c7weblogs/calimage/uid___A001_X146c_Xdf.hifa_image.weblog')
 runs = np.delete(runs, badidx)
 
+
+
 # don't re-parse directories already in the pickle.
 if not reload:
    for mous in results.keys():
@@ -236,6 +238,14 @@ for run in runs:
                fc_im_sec += aU.timeTclean(clog,spw=str(sspw),style="findcont",quiet=True)
             fctime = fc_im_sec/3600
             allimagetime += fctime
+            if len(vspws)==0: # someone put in cont.dat
+               print("pre-existing cont.dat in "+run)
+               with open(run+"/html/stage"+stageno+"/cont.dat") as cdat:
+                  for l in cdat.readlines():
+                     if "SpectralWindow" in l:
+                        vspw=int(l.split(" ")[1].strip("\n"))
+                        if vspw not in vspws:
+                           vspws.append(vspw)
 
             
       # -----------------------------------------------
