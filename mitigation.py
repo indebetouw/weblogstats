@@ -55,7 +55,7 @@ pl.ylabel("product size [GB]")
 
 mitprod=(mit_field<nfield)|(mit_spw<nspw)
 z=np.where((mitigated==True)*(nspw>0)*(mitprod==False))[0]
-myplot,=pl.plot((nfield*nspw)[z],initialsize[z],'.',label="mitigated (maxcube)")
+myplot,=pl.plot((nfield*nspw)[z],initialsize[z],'r.',label="mitigated (maxcube)")
 for iz in z:
     pl.arrow((nfield*nspw)[iz],initialsize[iz],
              dx=(mit_field*mit_spw)[iz]-(nfield*nspw)[iz],
@@ -64,7 +64,7 @@ for iz in z:
 
 mitprod=(mit_field<nfield)|(mit_spw<nspw)
 z=np.where((mitigated==True)*(nspw>0)*mitprod)[0]
-myplot,=pl.plot((nfield*nspw)[z],initialsize[z],'.',label="mitigated (product)")
+myplot,=pl.plot((nfield*nspw)[z],initialsize[z],'g.',label="mitigated (product)")
 #pl.plot((nfield*nspw)[z],np.zeros(len(z))+600,'^',color=myplot.get_color())
 for iz in z:
     #pl.plot([(mit_field*mit_spw)[iz],(nfield*nspw)[iz]],
