@@ -1,0 +1,18 @@
+ uid___A001_X1465_X1cf1.hifa_cal	selfcal NA 
+ uid___A001_X1465_X1cf7.hifa_cal	selfcal NA TDM
+ uid___A001_X1465_X1e96.hifa_cal	flux inconsistent b/w EBs NA
+add imaging total=1d 15:07, cube=19:50, img=1:40+19:50+2:01+(2:28)
+https://asa.alma.cl/apa/static/weblogs/2019-11-08T17-01-02.337.A001-1465-1e96/html/t1-4.html
+ uid___A001_X1465_X2bb1.hifa_cal	? ran iPL robust=2 by hand EA?? ah ok theter was a range in AR and they wanted it to be at the highest end for sensitivity.  should we consider doing that in general? seems shitty.
+https://asa.alma.cl/apa/static/weblogs/2019-11-02T21-03-48.562.A001-1465-2bb1/html/t2-4m.html?sidebar=sidebar_stage22&ms=all&subpage=t2-4m_details.html
+in any case its not very long-running
+
+ uid___A001_X1465_X3acd.hifa_cal	looks like PL im...
+ uid___A001_X1465_X443.hifa_cal 	selfcal NA
+ uid___A001_X1465_X66d.hifa_cal 
+ uid___A001_X1465_X72.hifa_cal  
+ uid___A001_X1467_X224.hifa_cal 
+ uid___A001_X1469_X17c.hifa_cal 
+ uid___A001_X146c_Xdf.hifa_cal  
+ uid___A001_X14c3_X2e0.hifa_cal 
+
