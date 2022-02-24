@@ -15,7 +15,7 @@ import analysisUtils as aU
 # if False, then it'll read from the pickle to save time.
 # but if you're adding features you want it to be True
 reload=False
-reload=True
+#reload=True
 
 # get weblogs from disk area - 
 rt='/lustre/naasc/sciops/comm/rindebet/pipeline/c7weblogs/calimage/'
@@ -44,7 +44,7 @@ z=np.where(np.array(['tmp' not in r for r in runs]))[0]
 runs=runs[z]
 
 # test
-# runs=runs[0:45]
+# runs=runs[0:10]
 
 # This project fails when finding the target source
 badidx = np.where(runs == '/lustre/naasc/sciops/comm/rindebet/pipeline/c7weblogs/calimage/uid___A001_X146c_Xdf.hifa_image.weblog')
@@ -300,6 +300,9 @@ for run in runs:
          webfreq=float(x[offset].findAll('td')[3].text.split()[0][:-3])
          offset=offset-2
 
+      xx=x[offset+3].td.text.split()
+      webbm=np.sqrt(float(xx[0])*float(xx[2]))
+
       if 'theoretical' not in x[offset+5].th.text:
          print("something wrong with parsing",x[offset+5])
          pdb.set_trace()
@@ -418,6 +421,7 @@ for run in runs:
                      'webcontrms':webcontrms,    # achieved agg cont rms
                      'webcontBW':webcontBW,  
                      'webfreq':webfreq,  
+                     'webbm':webbm,
                      'webdirtyDR':webdirtyDR,
                      'webcontpk':webcontpk,      # achieved agg cont pk
                      'allowedcubesize'  :allowedcubesize  , 

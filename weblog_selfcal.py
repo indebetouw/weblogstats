@@ -5,7 +5,7 @@ from glob import glob
 from datetime import date
 
 plotroot="bm2021"
-#plotroot="allc7"
+plotroot="allc7"
 
 pickleroot=plotroot+"_stats"
 
@@ -35,6 +35,9 @@ rmsrat =contrms/predrms
 
 neb=np.array([v['nEB'] for v in results.values()])
 nant=np.array([v['nant'] for v in results.values()])
+
+freq=np.array([v['webfreq'] for v in results.values()])
+beam=np.array([v['webbm'] for v in results.values()])
 
 plversion=np.array([v['plversion'] for v in results.values()])
 project=np.array([v['project'] for v in results.values()])
@@ -138,10 +141,10 @@ for k,x in enumerate(xs):
 
 
 
-#---------------------------------------------------------------------------------------
+#-----------------------------------------------------------------------------
 
 
-if True:
+if False:
 
     pl.clf()
     pl.subplot(212)
@@ -217,3 +220,17 @@ if True:
 
 
 
+
+
+#-----------------------------------------------------------------------------
+
+pl.clf()
+pl.plot(3e8/(freq*1e9)*206265/beam*.574, dirtyDRperscan,'.')
+# TH approximates L80 to be .574 lam/d
+pl.xscale("log")
+pl.yscale("log")
+pl.xlabel(r"0.574$\lambda/\theta$ [m]")
+pl.ylabel("dirty SNR/ant/scan")
+pl.plot(pl.xlim(),[1,1],'k')
+pl.xlim(20,1e4)
+pl.savefig(plotroot+"_contSNR_L80.png")
