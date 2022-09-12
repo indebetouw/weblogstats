@@ -381,6 +381,7 @@ for run in runs:
       mitigatedcubesize = float(x[7].split()[-2])
       allowedprodsize   = float(x[9].split()[-2])
       initialprodsize   = float(x[11].split()[-2])
+      prodsizeaftercube = float(x[13].split()[-2])
       mitigatedprodsize = float(x[15].split()[-2])
 
       x=soup.table.tbody.find_all('tr')
@@ -430,6 +431,7 @@ for run in runs:
                      'mitigatedcubesize':mitigatedcubesize, 
                      'allowedprodsize'  :allowedprodsize  , 
                      'initialprodsize'  :initialprodsize  , 
+                     'prodsizeaftercube' :prodsizeaftercube , 
                      'mitigatedprodsize':mitigatedprodsize,
                      'mitigated': mitigated,
                      'mit_nbins': mit_nbins,
